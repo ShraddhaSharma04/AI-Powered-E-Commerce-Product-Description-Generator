@@ -5,11 +5,9 @@ An AI-powered full-stack web application that helps food processing businesses g
 ## Tech Stack
 
 - Frontend: React JS
-- Styling: Tailwind CSS
 - Backend: Node/ExpressJS
-- Database: PostgreSQL via Supabase
+- Database: MongoDB via Atlas
 - AI API: Gemini API
-- Deployment: Vercel + Render
 
 ## Setup
 
