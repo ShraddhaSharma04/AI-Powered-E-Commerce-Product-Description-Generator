@@ -1,5 +1,6 @@
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import { Button, Input, Toast, Loader } from "../components/ui";
 
 function Generator() {
   return (
@@ -15,41 +16,50 @@ function Generator() {
           Enter product details below. AI functionality will be added later.
         </p>
 
+        <Toast message="Week 3 UI components are working successfully." />
+
         <div className="bg-white p-6 rounded shadow">
-          <label className="block mb-2 font-semibold">Product Name</label>
-          <input
-            className="w-full border p-3 rounded mb-4"
+          <Input
+            label="Product Name"
             placeholder="Example: Himalayan Millet Cookies"
           />
 
-          <label className="block mb-2 font-semibold">Ingredients</label>
-          <input
-            className="w-full border p-3 rounded mb-4"
+          <Input
+            label="Ingredients"
             placeholder="Example: Millet, jaggery, dry fruits"
           />
 
-          <label className="block mb-2 font-semibold">Weight</label>
-          <input
-            className="w-full border p-3 rounded mb-4"
+          <Input
+            label="Weight"
             placeholder="Example: 250g"
           />
 
-          <label className="block mb-2 font-semibold">Key Features</label>
-          <textarea
-            className="w-full border p-3 rounded mb-4"
-            placeholder="Example: Healthy, natural, handmade"
-          ></textarea>
+          <div className="mb-4">
+            <label className="block mb-2 font-semibold text-gray-700">
+              Key Features
+            </label>
+            <textarea
+              className="w-full border p-3 rounded"
+              placeholder="Example: Healthy, natural, handmade"
+            ></textarea>
+          </div>
 
-          <label className="block mb-2 font-semibold">Tone</label>
-          <select className="w-full border p-3 rounded mb-4">
-            <option>Premium</option>
-            <option>Traditional</option>
-            <option>Health-Focused</option>
-          </select>
+          <div className="mb-4">
+            <label className="block mb-2 font-semibold text-gray-700">
+              Tone
+            </label>
+            <select className="w-full border p-3 rounded">
+              <option>Premium</option>
+              <option>Traditional</option>
+              <option>Health-Focused</option>
+            </select>
+          </div>
 
-          <button className="bg-green-700 text-white px-6 py-3 rounded">
-            Generate Description
-          </button>
+          <Button>Generate Description</Button>
+
+          <div className="mt-6">
+            <Loader text="AI output will appear here in upcoming weeks." />
+          </div>
         </div>
       </main>
 
