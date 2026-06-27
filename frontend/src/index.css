@@ -4,4 +4,53 @@ body {
   margin: 0;
   font-family: Arial, Helvetica, sans-serif;
   background-color: #f8fafc;
+  color: #111827;
+}
+
+/* Dark mode styles */
+body.dark-mode {
+  background-color: #111827;
+  color: white;
+}
+
+body.dark-mode nav {
+  background-color: #1f2937 !important;
+}
+
+body.dark-mode main {
+  background-color: #111827;
+  color: white;
+}
+
+body.dark-mode footer {
+  background-color: #000000 !important;
+}
+
+body.dark-mode .bg-white {
+  background-color: #1f2937 !important;
+  color: white !important;
+}
+
+body.dark-mode .bg-green-50 {
+  background-color: #111827 !important;
+  color: white !important;
+}
+
+body.dark-mode .text-gray-700,
+body.dark-mode .text-gray-600,
+body.dark-mode .text-gray-900 {
+  color: white !important;
+}
+
+body.dark-mode input,
+body.dark-mode textarea,
+body.dark-mode select {
+  background-color: #374151;
+  color: white;
+  border-color: #6b7280;
+}
+
+body.dark-mode input::placeholder,
+body.dark-mode textarea::placeholder {
+  color: #d1d5db;
 }
