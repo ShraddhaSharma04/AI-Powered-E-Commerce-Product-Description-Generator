@@ -93,7 +93,7 @@ app.post("/api/descriptions", (req, res) => {
     tone,
     features,
     description,
-  } = req.body;
+  } = req.body || {};
 
   if (!productName || !ingredients || !weight || !tone || !features) {
     return res.status(400).json({
