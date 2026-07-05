@@ -1,8 +1,55 @@
+import { useState } from "react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import { Button, Input, Toast, Loader } from "../components/ui";
 
 function Generator() {
+  const [formData, setFormData] = useState({
+    productName: "",
+    ingredients: "",
+    weight: "",
+    features: "",
+    tone: "Premium",
+  });
+
+  const [message, setMessage] = useState("");
+
+  function handleChange(event) {
+    setFormData({
+      ...formData,
+      [event.target.name]: event.target.value,
+    });
+  }
+
+  async function handleSubmit(event) {
+    event.preventDefault();
+
+    const generatedDescription = `${formData.productName} is a quality food product made with ${formData.ingredients}. It is ideal for customers looking for ${formData.features}.`;
+
+    const response = await fetch("http://localhost:5000/api/descriptions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        ...formData,
+        description: generatedDescription,
+      }),
+    });
+
+    if (response.ok) {
+      setMessage("Description created and saved in MongoDB successfully.");
+      setFormData({
+        productName: "",
+        ingredients: "",
+        weight: "",
+        features: "",
+        tone: "Premium",
+      });
+    } else {
+      setMessage("Failed to create description.");
+    }
+  }
+
   return (
     <>
       <Navbar />
@@ -13,54 +60,71 @@ function Generator() {
         </h1>
 
         <p className="text-gray-700 mb-6">
-          Enter product details below. AI functionality will be added later.
+          Enter product details below to create and save a product description.
         </p>
 
-        <Toast message="Week 3 UI components are working successfully." />
+        {message && (
+          <p className="bg-green-100 text-green-800 p-3 rounded mb-4">
+            {message}
+          </p>
+        )}
 
-        <div className="bg-white p-6 rounded shadow">
-          <Input
-            label="Product Name"
-            placeholder="Example: Himalayan Millet Cookies"
+        <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow">
+          <label className="block mb-2 font-semibold">Product Name</label>
+          <input
+            name="productName"
+            value={formData.productName}
+            onChange={handleChange}
+            className="w-full border p-3 rounded mb-4"
+            placeholder="Example: Himalayan Apple Jam"
           />
 
-          <Input
-            label="Ingredients"
-            placeholder="Example: Millet, jaggery, dry fruits"
+          <label className="block mb-2 font-semibold">Ingredients</label>
+          <input
+            name="ingredients"
+            value={formData.ingredients}
+            onChange={handleChange}
+            className="w-full border p-3 rounded mb-4"
+            placeholder="Example: Apple, sugar, lemon juice"
           />
 
-          <Input
-            label="Weight"
-            placeholder="Example: 250g"
+          <label className="block mb-2 font-semibold">Weight</label>
+          <input
+            name="weight"
+            value={formData.weight}
+            onChange={handleChange}
+            className="w-full border p-3 rounded mb-4"
+            placeholder="Example: 300g"
           />
 
-          <div className="mb-4">
-            <label className="block mb-2 font-semibold text-gray-700">
-              Key Features
-            </label>
-            <textarea
-              className="w-full border p-3 rounded"
-              placeholder="Example: Healthy, natural, handmade"
-            ></textarea>
-          </div>
+          <label className="block mb-2 font-semibold">Key Features</label>
+          <textarea
+            name="features"
+            value={formData.features}
+            onChange={handleChange}
+            className="w-full border p-3 rounded mb-4"
+            placeholder="Example: Natural, fruity, handmade"
+          ></textarea>
 
-          <div className="mb-4">
-            <label className="block mb-2 font-semibold text-gray-700">
-              Tone
-            </label>
-            <select className="w-full border p-3 rounded">
-              <option>Premium</option>
-              <option>Traditional</option>
-              <option>Health-Focused</option>
-            </select>
-          </div>
+          <label className="block mb-2 font-semibold">Tone</label>
+          <select
+            name="tone"
+            value={formData.tone}
+            onChange={handleChange}
+            className="w-full border p-3 rounded mb-4"
+          >
+            <option>Premium</option>
+            <option>Traditional</option>
+            <option>Health-Focused</option>
+          </select>
 
-          <Button>Generate Description</Button>
-
-          <div className="mt-6">
-            <Loader text="AI output will appear here in upcoming weeks." />
-          </div>
-        </div>
+          <button
+             type="submit"
+             className="bg-green-700 text-white px-6 py-3 rounded cursor-pointer hover:bg-green-800 active:scale-95 transition"
+          >
+         Save Description
+        </button>
+        </form>
       </main>
 
       <Footer />

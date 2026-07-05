@@ -1,6 +1,9 @@
 const express = require("express");
 const cors = require("cors");
+const mongoose = require("mongoose");
 require("dotenv").config();
+
+const Description = require("./models/Description");
 
 const app = express();
 
@@ -9,163 +12,183 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 5000;
 
-let descriptions = [
-  {
-    id: 1,
-    productName: "Himalayan Millet Cookies",
-    ingredients: "Millet, jaggery, dry fruits",
-    weight: "250g",
-    tone: "Health-Focused",
-    features: "Healthy, natural, handmade",
-    description:
-      "Himalayan Millet Cookies are a wholesome snack made with nutritious millet, natural jaggery, and dry fruits. Perfect for health-conscious customers looking for a tasty and natural food option.",
-  },
-  {
-    id: 2,
-    productName: "Traditional Mango Pickle",
-    ingredients: "Mango, mustard oil, spices",
-    weight: "500g",
-    tone: "Traditional",
-    features: "Homemade taste, spicy, preservative-free",
-    description:
-      "Traditional Mango Pickle brings authentic homemade flavor with carefully selected mangoes, mustard oil, and Indian spices. It is a perfect companion for everyday meals.",
-  },
-];
+mongoose
+  .connect(process.env.MONGO_URI)
+  .then(() => {
+    console.log("MongoDB connected successfully");
+  })
+  .catch((error) => {
+    console.error("MongoDB connection error:", error.message);
+  });
 
+// Health check endpoint
 app.get("/api/health", (req, res) => {
   res.status(200).json({
     success: true,
-    message: "Backend server is running successfully",
+    message: "Backend server and database are running successfully",
   });
 });
 
-app.get("/api/descriptions", (req, res) => {
-  res.status(200).json({
-    success: true,
-    count: descriptions.length,
-    data: descriptions,
-  });
-});
+// GET all descriptions
+app.get("/api/descriptions", async (req, res, next) => {
+  try {
+    const descriptions = await Description.find().sort({ createdAt: -1 });
 
-app.get("/api/descriptions/search", (req, res) => {
-  const query = req.query.q;
-
-  if (!query) {
-    return res.status(400).json({
-      success: false,
-      message: "Search query is required",
+    res.status(200).json({
+      success: true,
+      count: descriptions.length,
+      data: descriptions,
     });
+  } catch (error) {
+    next(error);
   }
-
-  const results = descriptions.filter((item) =>
-    item.productName.toLowerCase().includes(query.toLowerCase())
-  );
-
-  res.status(200).json({
-    success: true,
-    count: results.length,
-    data: results,
-  });
 });
 
-app.get("/api/descriptions/:id", (req, res) => {
-  const id = Number(req.params.id);
-  const description = descriptions.find((item) => item.id === id);
+// SEARCH descriptions
+app.get("/api/descriptions/search", async (req, res, next) => {
+  try {
+    const query = req.query.q;
 
-  if (!description) {
-    return res.status(404).json({
-      success: false,
-      message: "Description not found",
+    if (!query) {
+      return res.status(400).json({
+        success: false,
+        message: "Search query is required",
+      });
+    }
+
+    const results = await Description.find({
+      productName: { $regex: query, $options: "i" },
     });
-  }
 
-  res.status(200).json({
-    success: true,
-    data: description,
-  });
-});
-
-app.post("/api/descriptions", (req, res) => {
-  const {
-    productName,
-    ingredients,
-    weight,
-    tone,
-    features,
-    description,
-  } = req.body || {};
-
-  if (!productName || !ingredients || !weight || !tone || !features) {
-    return res.status(400).json({
-      success: false,
-      message: "Product name, ingredients, weight, tone, and features are required",
+    res.status(200).json({
+      success: true,
+      count: results.length,
+      data: results,
     });
+  } catch (error) {
+    next(error);
   }
-
-  const newDescription = {
-    id: descriptions.length + 1,
-    productName,
-    ingredients,
-    weight,
-    tone,
-    features,
-    description:
-      description ||
-      `${productName} is a high-quality food product made with ${ingredients}. It is suitable for customers looking for ${features}.`,
-  };
-
-  descriptions.push(newDescription);
-
-  res.status(201).json({
-    success: true,
-    message: "Description created successfully",
-    data: newDescription,
-  });
 });
 
-app.put("/api/descriptions/:id", (req, res) => {
-  const id = Number(req.params.id);
-  const descriptionIndex = descriptions.findIndex((item) => item.id === id);
+// GET single description
+app.get("/api/descriptions/:id", async (req, res, next) => {
+  try {
+    const description = await Description.findById(req.params.id);
 
-  if (descriptionIndex === -1) {
-    return res.status(404).json({
-      success: false,
-      message: "Description not found",
+    if (!description) {
+      return res.status(404).json({
+        success: false,
+        message: "Description not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: description,
     });
+  } catch (error) {
+    next(error);
   }
-
-  descriptions[descriptionIndex] = {
-    ...descriptions[descriptionIndex],
-    ...req.body,
-  };
-
-  res.status(200).json({
-    success: true,
-    message: "Description updated successfully",
-    data: descriptions[descriptionIndex],
-  });
 });
 
-app.delete("/api/descriptions/:id", (req, res) => {
-  const id = Number(req.params.id);
-  const descriptionIndex = descriptions.findIndex((item) => item.id === id);
+// POST create description
+app.post("/api/descriptions", async (req, res, next) => {
+  try {
+    const {
+      productName,
+      ingredients,
+      weight,
+      tone,
+      features,
+      description,
+    } = req.body || {};
 
-  if (descriptionIndex === -1) {
-    return res.status(404).json({
-      success: false,
-      message: "Description not found",
+    if (!productName || !ingredients || !weight || !tone || !features) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Product name, ingredients, weight, tone, and features are required",
+      });
+    }
+
+    const newDescription = await Description.create({
+      productName,
+      ingredients,
+      weight,
+      tone,
+      features,
+      description:
+        description ||
+        `${productName} is a high-quality food product made with ${ingredients}. It is suitable for customers looking for ${features}.`,
     });
+
+    res.status(201).json({
+      success: true,
+      message: "Description created successfully",
+      data: newDescription,
+    });
+  } catch (error) {
+    next(error);
   }
-
-  descriptions.splice(descriptionIndex, 1);
-
-  res.status(204).send();
 });
 
+// PUT update description
+app.put("/api/descriptions/:id", async (req, res, next) => {
+  try {
+    const updatedDescription = await Description.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+
+    if (!updatedDescription) {
+      return res.status(404).json({
+        success: false,
+        message: "Description not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Description updated successfully",
+      data: updatedDescription,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// DELETE description
+app.delete("/api/descriptions/:id", async (req, res, next) => {
+  try {
+    const deletedDescription = await Description.findByIdAndDelete(
+      req.params.id
+    );
+
+    if (!deletedDescription) {
+      return res.status(404).json({
+        success: false,
+        message: "Description not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Description deleted successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Error handling middleware
 app.use((err, req, res, next) => {
   res.status(500).json({
     success: false,
-    message: "Internal server error",
+    message: err.message || "Internal server error",
   });
 });
 
