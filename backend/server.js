@@ -4,7 +4,6 @@ const mongoose = require("mongoose");
 require("dotenv").config();
 
 const Description = require("./models/Description");
-
 const app = express();
 
 app.use(cors());
