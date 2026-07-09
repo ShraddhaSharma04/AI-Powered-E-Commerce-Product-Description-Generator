@@ -1,27 +1,48 @@
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import { Modal } from "../components/ui";
 
 function About() {
   return (
     <>
       <Navbar />
 
-      <main className="max-w-4xl mx-auto p-6">
-        <h1 className="text-3xl font-bold mb-4">About Project</h1>
-
-        <p className="text-gray-700 mb-6">
-          This project is built for food processing businesses like HimShakti.
-          It helps them create professional product descriptions for platforms
-          like Amazon, Flipkart, and other online marketplaces.
-        </p>
-
-        <Modal title="Project Goal">
+      <main className="standard-page">
+        <section className="page-intro">
+          <p className="section-label">ABOUT THE PROJECT</p>
+          <h1>Helping Food Businesses Create Better Online Listings</h1>
           <p>
-            The goal of this project is to save content-writing time and help
-            businesses improve their product presentation using AI.
+            AI ProductGen is a full-stack web application created for food
+            processing businesses that need professional e-commerce product
+            descriptions.
           </p>
-        </Modal>
+        </section>
+
+        <section className="about-grid">
+          <article className="about-card">
+            <h2>The Problem</h2>
+            <p>
+              Small businesses often have high-quality products but lack the
+              time and writing support required to create effective online
+              product listings.
+            </p>
+          </article>
+
+          <article className="about-card">
+            <h2>The Solution</h2>
+            <p>
+              The application converts product details such as ingredients,
+              weight, features, and tone into structured e-commerce content.
+            </p>
+          </article>
+
+          <article className="about-card">
+            <h2>Technology</h2>
+            <p>
+              The project uses React, Node.js, Express.js, MongoDB Atlas,
+              Mongoose, Tailwind CSS, and Gemini API integration.
+            </p>
+          </article>
+        </section>
       </main>
 
       <Footer />
