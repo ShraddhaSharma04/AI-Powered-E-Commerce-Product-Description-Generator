@@ -1,36 +1,40 @@
-import { Link } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { Link, NavLink } from "react-router-dom";
 
 function Navbar() {
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(
+    localStorage.getItem("theme") === "dark"
+  );
 
-  function toggleTheme() {
-    setDarkMode(!darkMode);
-    document.body.classList.toggle("dark-mode");
-  }
+  useEffect(() => {
+    document.body.classList.toggle("dark-mode", darkMode);
+    localStorage.setItem("theme", darkMode ? "dark" : "light");
+  }, [darkMode]);
 
   return (
-    <nav className="bg-white shadow p-4">
-      <div className="max-w-6xl mx-auto flex flex-wrap justify-between items-center gap-4">
-        <Link to="/" className="text-xl font-bold text-green-700">
+    <header className="site-header">
+      <nav className="navbar">
+        <Link to="/" className="brand">
           AI ProductGen
         </Link>
 
-        <div className="flex flex-wrap gap-4 text-gray-700">
-          <Link to="/">Home</Link>
-          <Link to="/about">About</Link>
-          <Link to="/generator">Generator</Link>
-          <Link to="/dashboard">Dashboard</Link>
-        </div>
+        <div className="nav-links">
+          <NavLink to="/">Home</NavLink>
+          <NavLink to="/about">About</NavLink>
+          <NavLink to="/generator">Generator</NavLink>
+          <NavLink to="/dashboard">Dashboard</NavLink>
 
-        <button
-          onClick={toggleTheme}
-          className="border px-4 py-2 rounded text-gray-700"
-        >
-          {darkMode ? "Light Mode" : "Dark Mode"}
-        </button>
-      </div>
-    </nav>
+          <button
+            type="button"
+            className="theme-button"
+            onClick={() => setDarkMode((current) => !current)}
+            aria-label="Toggle theme"
+          >
+            {darkMode ? "☀️" : "🌙"}
+          </button>
+        </div>
+      </nav>
+    </header>
   );
 }
 
