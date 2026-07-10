@@ -2,51 +2,94 @@ import { useState } from "react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
-function Generator() {
-  const [formData, setFormData] = useState({
-    productName: "",
-    ingredients: "",
-    weight: "",
-    features: "",
-    tone: "Premium",
-  });
+const initialForm = {
+  productName: "",
+  ingredients: "",
+  weight: "",
+  features: "",
+  tone: "Premium",
+};
 
+function Generator() {
+  const [formData, setFormData] = useState(initialForm);
+  const [generatedDescription, setGeneratedDescription] = useState("");
   const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
 
   function handleChange(event) {
-    setFormData({
-      ...formData,
-      [event.target.name]: event.target.value,
-    });
+    const { name, value } = event.target;
+
+    setFormData((current) => ({
+      ...current,
+      [name]: value,
+    }));
+  }
+
+  function createDescriptionText() {
+    const toneOpening = {
+      Premium: "Discover the premium quality of",
+      Traditional: "Experience the authentic homemade taste of",
+      "Health-Focused": "Enjoy a wholesome and health-conscious choice with",
+    };
+
+    return `${toneOpening[formData.tone]} ${
+      formData.productName
+    }, carefully prepared using ${
+      formData.ingredients
+    }. This ${formData.weight} product offers ${
+      formData.features
+    }, making it an excellent choice for customers looking for quality and flavour.`;
   }
 
   async function handleSubmit(event) {
     event.preventDefault();
 
-    const generatedDescription = `${formData.productName} is a quality food product made with ${formData.ingredients}. It is ideal for customers looking for ${formData.features}.`;
+    setMessage("");
+    setError("");
 
-    const response = await fetch("http://localhost:5000/api/descriptions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        ...formData,
-        description: generatedDescription,
-      }),
-    });
+    if (
+      !formData.productName.trim() ||
+      !formData.ingredients.trim() ||
+      !formData.weight.trim() ||
+      !formData.features.trim()
+    ) {
+      setError("Please complete all product fields.");
+      return;
+    }
 
-    if (response.ok) {
+    const descriptionText = createDescriptionText();
+
+    try {
+      setSaving(true);
+
+      const response = await fetch(
+        "http://localhost:5000/api/descriptions",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            ...formData,
+            description: descriptionText,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Unable to save description.");
+      }
+
+      setGeneratedDescription(data.data.description);
       setMessage("Description created and saved in MongoDB successfully.");
-      setFormData({
-        productName: "",
-        ingredients: "",
-        weight: "",
-        features: "",
-        tone: "Premium",
-      });
-    } else {
-      setMessage("Failed to create description.");
+      setFormData(initialForm);
+    } catch (requestError) {
+      setError(requestError.message);
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -54,77 +97,130 @@ function Generator() {
     <>
       <Navbar />
 
-      <main className="max-w-4xl mx-auto p-6">
-        <h1 className="text-3xl font-bold mb-4">
-          Product Description Generator
-        </h1>
-
-        <p className="text-gray-700 mb-6">
-          Enter product details below to create and save a product description.
-        </p>
-
-        {message && (
-          <p className="bg-green-100 text-green-800 p-3 rounded mb-4">
-            {message}
+      <main className="generator-page">
+        <section className="generator-heading">
+          <p className="section-label">AI CONTENT GENERATOR</p>
+          <h1>Create a Product Description</h1>
+          <p>
+            Enter your product information and save a professional description
+            directly to MongoDB.
           </p>
-        )}
+        </section>
 
-        <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow">
-          <label className="block mb-2 font-semibold">Product Name</label>
-          <input
-            name="productName"
-            value={formData.productName}
-            onChange={handleChange}
-            className="w-full border p-3 rounded mb-4"
-            placeholder="Example: Himalayan Apple Jam"
-          />
+        <section className="generator-layout">
+          <form className="generator-form-card" onSubmit={handleSubmit}>
+            <div className="form-title">
+              <span>01</span>
+              <div>
+                <h2>Product Information</h2>
+                <p>Complete the details below.</p>
+              </div>
+            </div>
 
-          <label className="block mb-2 font-semibold">Ingredients</label>
-          <input
-            name="ingredients"
-            value={formData.ingredients}
-            onChange={handleChange}
-            className="w-full border p-3 rounded mb-4"
-            placeholder="Example: Apple, sugar, lemon juice"
-          />
+            {message && <div className="success-message">{message}</div>}
+            {error && <div className="error-message">{error}</div>}
 
-          <label className="block mb-2 font-semibold">Weight</label>
-          <input
-            name="weight"
-            value={formData.weight}
-            onChange={handleChange}
-            className="w-full border p-3 rounded mb-4"
-            placeholder="Example: 300g"
-          />
+            <div className="form-grid">
+              <div className="form-group full-width">
+                <label htmlFor="productName">Product Name</label>
+                <input
+                  id="productName"
+                  name="productName"
+                  value={formData.productName}
+                  onChange={handleChange}
+                  placeholder="Example: Himalayan Apple Jam"
+                />
+              </div>
 
-          <label className="block mb-2 font-semibold">Key Features</label>
-          <textarea
-            name="features"
-            value={formData.features}
-            onChange={handleChange}
-            className="w-full border p-3 rounded mb-4"
-            placeholder="Example: Natural, fruity, handmade"
-          ></textarea>
+              <div className="form-group full-width">
+                <label htmlFor="ingredients">Ingredients</label>
+                <textarea
+                  id="ingredients"
+                  name="ingredients"
+                  value={formData.ingredients}
+                  onChange={handleChange}
+                  placeholder="Apple, sugar, lemon juice"
+                  rows="3"
+                />
+              </div>
 
-          <label className="block mb-2 font-semibold">Tone</label>
-          <select
-            name="tone"
-            value={formData.tone}
-            onChange={handleChange}
-            className="w-full border p-3 rounded mb-4"
-          >
-            <option>Premium</option>
-            <option>Traditional</option>
-            <option>Health-Focused</option>
-          </select>
+              <div className="form-group">
+                <label htmlFor="weight">Weight</label>
+                <input
+                  id="weight"
+                  name="weight"
+                  value={formData.weight}
+                  onChange={handleChange}
+                  placeholder="Example: 300g"
+                />
+              </div>
 
-          <button
-             type="submit"
-             className="bg-green-700 text-white px-6 py-3 rounded cursor-pointer hover:bg-green-800 active:scale-95 transition"
-          >
-         Save Description
-        </button>
-        </form>
+              <div className="form-group">
+                <label htmlFor="tone">Description Tone</label>
+                <select
+                  id="tone"
+                  name="tone"
+                  value={formData.tone}
+                  onChange={handleChange}
+                >
+                  <option value="Premium">Premium</option>
+                  <option value="Traditional">Traditional</option>
+                  <option value="Health-Focused">Health-Focused</option>
+                </select>
+              </div>
+
+              <div className="form-group full-width">
+                <label htmlFor="features">Key Features</label>
+                <textarea
+                  id="features"
+                  name="features"
+                  value={formData.features}
+                  onChange={handleChange}
+                  placeholder="Natural, handmade, preservative-free"
+                  rows="4"
+                />
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              className="submit-button"
+              disabled={saving}
+            >
+              {saving ? "Saving Description..." : "Create and Save Description"}
+            </button>
+          </form>
+
+          <aside className="description-preview">
+            <div className="preview-number">02</div>
+
+            <h2>Description Preview</h2>
+
+            {generatedDescription ? (
+              <>
+                <p>{generatedDescription}</p>
+
+                <button
+                  type="button"
+                  className="copy-button"
+                  onClick={() =>
+                    navigator.clipboard.writeText(generatedDescription)
+                  }
+                >
+                  Copy Description
+                </button>
+              </>
+            ) : (
+              <div className="preview-placeholder">
+                <span>✨</span>
+                <p>
+                  Your generated description will appear here after you submit
+                  the form.
+                </p>
+              </div>
+            )}
+          </aside>
+        </section>
       </main>
 
       <Footer />
