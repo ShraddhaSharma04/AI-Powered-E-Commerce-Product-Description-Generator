@@ -1,24 +1,37 @@
 import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import Card from "../components/Card";
 
 function Dashboard() {
-  const [message, setMessage] = useState("");
   const [descriptions, setDescriptions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
   const [editingId, setEditingId] = useState("");
   const [updatedTone, setUpdatedTone] = useState("Premium");
 
   async function fetchDescriptions() {
     try {
-      const response = await fetch("http://localhost:5000/api/descriptions");
+      setLoading(true);
+      setError("");
+
+      const response = await fetch(
+        "http://localhost:5000/api/descriptions"
+      );
+
       const data = await response.json();
-      setDescriptions(data.data);
+
+      if (!response.ok) {
+        throw new Error(
+          data.message || "Unable to load product descriptions."
+        );
+      }
+
+      setDescriptions(Array.isArray(data.data) ? data.data : []);
+    } catch (requestError) {
+      setError(requestError.message);
+    } finally {
       setLoading(false);
-    } catch (error) {
-      setLoading(false);
-      setMessage("Failed to fetch descriptions.");
     }
   }
 
@@ -26,126 +39,297 @@ function Dashboard() {
     fetchDescriptions();
   }, []);
 
-  async function deleteDescription(id) {
-    await fetch(`http://localhost:5000/api/descriptions/${id}`, {
-      method: "DELETE",
-    });
+  async function updateDescription(id) {
+    try {
+      setMessage("");
+      setError("");
 
-    setMessage("Description deleted successfully.");
-    fetchDescriptions();
+      const response = await fetch(
+        `http://localhost:5000/api/descriptions/${id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            tone: updatedTone,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.message || "Unable to update the description."
+        );
+      }
+
+      setMessage("Description updated successfully.");
+      setEditingId("");
+
+      await fetchDescriptions();
+    } catch (requestError) {
+      setError(requestError.message);
+    }
   }
 
-  async function updateDescription(id) {
-    await fetch(`http://localhost:5000/api/descriptions/${id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        tone: updatedTone,
-      }),
-    });
+  async function deleteDescription(id) {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this product description?"
+    );
 
-    setMessage("Description updated successfully.");
-    setEditingId("");
-    fetchDescriptions();
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      setMessage("");
+      setError("");
+
+      const response = await fetch(
+        `http://localhost:5000/api/descriptions/${id}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      if (!response.ok) {
+        const data = await response.json();
+
+        throw new Error(
+          data.message || "Unable to delete the description."
+        );
+      }
+
+      setMessage("Description deleted successfully.");
+
+      await fetchDescriptions();
+    } catch (requestError) {
+      setError(requestError.message);
+    }
   }
 
   return (
     <>
       <Navbar />
 
-      <main className="max-w-6xl mx-auto p-6">
-        <h1 className="text-3xl font-bold mb-4">Dashboard</h1>
+      <main className="dashboard-page">
+        <section className="dashboard-header">
+          <p className="section-label">PRODUCT MANAGEMENT</p>
 
-        <p className="text-gray-700 mb-6">
-          Product descriptions are fetched from MongoDB through the Express API.
-        </p>
+          <h1>Dashboard</h1>
+
+          <p>
+            Monitor and manage your product descriptions stored in
+            MongoDB Atlas.
+          </p>
+        </section>
 
         {message && (
-          <p className="bg-green-100 text-green-800 p-3 rounded mb-4">
-            {message}
-          </p>
+          <div className="success-message">{message}</div>
         )}
 
-        <div className="grid md:grid-cols-3 gap-6 mb-8">
-          <Card
-            title="Total Descriptions"
-            description={`${descriptions.length} descriptions saved`}
-          />
+        {error && (
+          <div className="error-message">{error}</div>
+        )}
 
-          <Card title="Database" description="MongoDB Atlas connected" />
+        <section className="dashboard-stats">
+          <article className="stat-card">
+            <span>{descriptions.length}</span>
 
-          <Card title="API Status" description="CRUD operations active" />
-        </div>
+            <h3>Saved Products</h3>
 
-        {loading && <p>Loading descriptions...</p>}
+            <p>Descriptions stored in MongoDB</p>
+          </article>
 
-        {!loading && (
-          <div className="bg-white p-6 rounded shadow">
-            <h2 className="text-2xl font-bold mb-4">
-              Saved Product Descriptions
-            </h2>
+          <article className="stat-card">
+            <span>AI</span>
 
-            <div className="space-y-4">
+            <h3>Content Generator</h3>
+
+            <p>Professional product listing content</p>
+          </article>
+
+          <article className="stat-card">
+            <span>3</span>
+
+            <h3>Tone Styles</h3>
+
+            <p>Premium, Traditional and Health-Focused</p>
+          </article>
+        </section>
+
+        <section className="dashboard-products">
+          <div className="dashboard-section-title">
+            <div>
+              <p className="section-label">YOUR COLLECTION</p>
+
+              <h2>Saved Product Descriptions</h2>
+            </div>
+
+            <button
+              type="button"
+              className="refresh-button"
+              onClick={fetchDescriptions}
+            >
+              Refresh
+            </button>
+          </div>
+
+          {loading ? (
+            <div className="loading-box">
+              Loading product descriptions...
+            </div>
+          ) : descriptions.length === 0 ? (
+            <div className="empty-state">
+              <h3>No products saved</h3>
+
+              <p>
+                Create your first product description from the
+                Generator page.
+              </p>
+            </div>
+          ) : (
+            <div className="dashboard-product-grid">
               {descriptions.map((item) => (
-                <div key={item._id} className="border p-4 rounded">
-                  <h3 className="font-bold text-lg">{item.productName}</h3>
-                  <p className="text-gray-600">Tone: {item.tone}</p>
-                  <p className="text-gray-600">Weight: {item.weight}</p>
-                  <p className="text-gray-700 mt-2">{item.description}</p>
+                <article
+                  className="dashboard-product-card"
+                  key={item._id}
+                >
+                  <div className="product-card-cover">
+                    <span>
+                      {item.productName
+                        ? item.productName.charAt(0).toUpperCase()
+                        : "P"}
+                    </span>
+                  </div>
 
-                  {editingId === item._id ? (
-                    <div className="mt-4">
-                      <select
-                        value={updatedTone}
-                        onChange={(e) => setUpdatedTone(e.target.value)}
-                        className="border p-2 rounded mr-2"
-                      >
-                        <option>Premium</option>
-                        <option>Traditional</option>
-                        <option>Health-Focused</option>
-                      </select>
+                  <div className="product-card-body">
+                    <div className="product-title-row">
+                      <div className="product-heading">
+                        <h3>{item.productName}</h3>
 
-                      <button
-                        onClick={() => updateDescription(item._id)}
-                        className="bg-blue-600 text-white px-4 py-2 rounded mr-2 cursor-pointer hover:bg-blue-700 active:scale-95 transition"
-                      >
-                        Save Update
-                      </button>
+                        <p className="product-id">
+                          Product ID: {item._id}
+                        </p>
+                      </div>
 
-                      <button
-                        onClick={() => setEditingId("")}
-                        className="bg-gray-500 text-white px-4 py-2 rounded cursor-pointer hover:bg-gray-600 active:scale-95 transition"
-                      >
-                        Cancel
-                      </button>
+                      <span className="tone-badge">
+                        {item.tone}
+                      </span>
                     </div>
-                  ) : (
-                    <div className="mt-4">
-                      <button
-                        onClick={() => {
-                          setEditingId(item._id);
-                          setUpdatedTone(item.tone);
-                        }}
-                        className="bg-yellow-500 text-white px-4 py-2 rounded mr-2 cursor-pointer hover:bg-yellow-600 active:scale-95 transition"
-                      >
-                        Edit Tone
-                      </button>
 
-                      <button
-                        onClick={() => deleteDescription(item._id)}
-                        className="bg-red-600 text-white px-4 py-2 rounded cursor-pointer hover:bg-red-700 active:scale-95 transition"
-                      >
-                        Delete
-                      </button>
+                    <div className="product-information-grid">
+                      <div className="product-info-item">
+                        <span className="info-label">
+                          Weight
+                        </span>
+
+                        <p>{item.weight}</p>
+                      </div>
+
+                      <div className="product-info-item">
+                        <span className="info-label">
+                          Ingredients
+                        </span>
+
+                        <p>{item.ingredients}</p>
+                      </div>
+
+                      <div className="product-info-item">
+                        <span className="info-label">
+                          Features
+                        </span>
+
+                        <p>{item.features}</p>
+                      </div>
                     </div>
-                  )}
-                </div>
+
+                    <div className="description-box">
+                      <span className="info-label">
+                        Product Description
+                      </span>
+
+                      <p>{item.description}</p>
+                    </div>
+
+                    {editingId === item._id ? (
+                      <div className="edit-panel">
+                        <label htmlFor={`tone-${item._id}`}>
+                          Update Tone
+                        </label>
+
+                        <select
+                          id={`tone-${item._id}`}
+                          value={updatedTone}
+                          onChange={(event) =>
+                            setUpdatedTone(event.target.value)
+                          }
+                        >
+                          <option value="Premium">
+                            Premium
+                          </option>
+
+                          <option value="Traditional">
+                            Traditional
+                          </option>
+
+                          <option value="Health-Focused">
+                            Health-Focused
+                          </option>
+                        </select>
+
+                        <div className="card-actions">
+                          <button
+                            type="button"
+                            className="update-button"
+                            onClick={() =>
+                              updateDescription(item._id)
+                            }
+                          >
+                            Save Update
+                          </button>
+
+                          <button
+                            type="button"
+                            className="cancel-button"
+                            onClick={() => setEditingId("")}
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="card-actions">
+                        <button
+                          type="button"
+                          className="update-button"
+                          onClick={() => {
+                            setEditingId(item._id);
+                            setUpdatedTone(item.tone);
+                          }}
+                        >
+                          Edit Tone
+                        </button>
+
+                        <button
+                          type="button"
+                          className="delete-button"
+                          onClick={() =>
+                            deleteDescription(item._id)
+                          }
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </article>
               ))}
             </div>
-          </div>
-        )}
+          )}
+        </section>
       </main>
 
       <Footer />
