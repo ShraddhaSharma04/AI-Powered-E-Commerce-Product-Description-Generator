@@ -1,18 +1,19 @@
 function Footer() {
   return (
     <footer className="site-footer">
-      <div className="footer-content">
-        <div>
-          <h2>AI ProductGen</h2>
+      <div className="footer-container">
+        <div className="footer-left">
+          <h3>AI ProductGen</h3>
+
           <p>
-            AI-powered e-commerce product description platform for food
-            processing businesses.
+            Create professional and engaging product descriptions for modern
+            e-commerce businesses.
           </p>
         </div>
-      </div>
 
-      <div className="footer-bottom">
-        © 2026 AI ProductGen. All rights reserved.
+        <div className="footer-right">
+          <p>© 2026 AI ProductGen. All rights reserved.</p>
+        </div>
       </div>
     </footer>
   );
