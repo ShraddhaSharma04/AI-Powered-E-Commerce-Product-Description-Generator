@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import { apiRequest } from "../utils/api";
 
 const initialForm = {
   productName: "",
@@ -63,25 +64,17 @@ function Generator() {
     try {
       setSaving(true);
 
-      const response = await fetch(
-        "http://localhost:5000/api/descriptions",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            ...formData,
-            description: descriptionText,
-          }),
-        }
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Unable to save description.");
-      }
+      const data = await apiRequest("/api/descriptions", {
+        method: "POST",
+        body: JSON.stringify({
+          productName: formData.productName,
+          ingredients: formData.ingredients,
+          weight: formData.weight,
+          tone: formData.tone,
+          features: formData.features,
+          description: descriptionText,
+        }),
+      });
 
       setGeneratedDescription(data.data.description);
       setMessage("Description created and saved in MongoDB successfully.");
@@ -100,7 +93,9 @@ function Generator() {
       <main className="generator-page">
         <section className="generator-heading">
           <p className="section-label">AI CONTENT GENERATOR</p>
+
           <h1>Create a Product Description</h1>
+
           <p>
             Enter your product information and save a professional description
             directly to MongoDB.
@@ -111,6 +106,7 @@ function Generator() {
           <form className="generator-form-card" onSubmit={handleSubmit}>
             <div className="form-title">
               <span>01</span>
+
               <div>
                 <h2>Product Information</h2>
                 <p>Complete the details below.</p>
@@ -118,11 +114,13 @@ function Generator() {
             </div>
 
             {message && <div className="success-message">{message}</div>}
+
             {error && <div className="error-message">{error}</div>}
 
             <div className="form-grid">
               <div className="form-group full-width">
                 <label htmlFor="productName">Product Name</label>
+
                 <input
                   id="productName"
                   name="productName"
@@ -134,6 +132,7 @@ function Generator() {
 
               <div className="form-group full-width">
                 <label htmlFor="ingredients">Ingredients</label>
+
                 <textarea
                   id="ingredients"
                   name="ingredients"
@@ -146,6 +145,7 @@ function Generator() {
 
               <div className="form-group">
                 <label htmlFor="weight">Weight</label>
+
                 <input
                   id="weight"
                   name="weight"
@@ -157,6 +157,7 @@ function Generator() {
 
               <div className="form-group">
                 <label htmlFor="tone">Description Tone</label>
+
                 <select
                   id="tone"
                   name="tone"
@@ -171,6 +172,7 @@ function Generator() {
 
               <div className="form-group full-width">
                 <label htmlFor="features">Key Features</label>
+
                 <textarea
                   id="features"
                   name="features"
@@ -187,7 +189,9 @@ function Generator() {
               className="submit-button"
               disabled={saving}
             >
-              {saving ? "Saving Description..." : "Create and Save Description"}
+              {saving
+                ? "Saving Description..."
+                : "Create and Save Description"}
             </button>
           </form>
 
@@ -213,6 +217,7 @@ function Generator() {
             ) : (
               <div className="preview-placeholder">
                 <span>✨</span>
+
                 <p>
                   Your generated description will appear here after you submit
                   the form.
