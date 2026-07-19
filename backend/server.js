@@ -1,11 +1,14 @@
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
+const session = require("express-session");
 require("dotenv").config();
 
-const authRoutes = require("./routes/authRoutes");
+const authRoutes = require("./Routes/Authroutes");
+const aiRoutes = require("./Routes/aiRoutes");
 const Description = require("./models/Description");
-const requireAuth = require("./middleware/requireAuth");
+const requireAuth = require("./Middleware/requireAuth");
+const passport = require("./config/passport");
 
 const app = express();
 
@@ -20,7 +23,18 @@ app.use(
 
 app.use(express.json());
 
+app.use(
+  session({
+    secret: process.env.JWT_SECRET || "ai_productgen_session_secret",
+    resave: false,
+    saveUninitialized: false,
+  })
+);
+
+app.use(passport.initialize());
+
 app.use("/api/auth", authRoutes);
+app.use("/api/ai", aiRoutes);
 
 mongoose
   .connect(process.env.MONGO_URI)
@@ -31,7 +45,6 @@ mongoose
     console.error("MongoDB connection error:", error.message);
   });
 
-// Health check endpoint - public route
 app.get("/api/health", (req, res) => {
   res.status(200).json({
     success: true,
@@ -39,7 +52,6 @@ app.get("/api/health", (req, res) => {
   });
 });
 
-// GET all descriptions - protected route
 app.get("/api/descriptions", requireAuth, async (req, res, next) => {
   try {
     const descriptions = await Description.find().sort({ createdAt: -1 });
@@ -54,7 +66,6 @@ app.get("/api/descriptions", requireAuth, async (req, res, next) => {
   }
 });
 
-// SEARCH descriptions - protected route
 app.get("/api/descriptions/search", requireAuth, async (req, res, next) => {
   try {
     const query = req.query.q;
@@ -80,7 +91,6 @@ app.get("/api/descriptions/search", requireAuth, async (req, res, next) => {
   }
 });
 
-// GET single description - protected route
 app.get("/api/descriptions/:id", requireAuth, async (req, res, next) => {
   try {
     const description = await Description.findById(req.params.id);
@@ -101,7 +111,6 @@ app.get("/api/descriptions/:id", requireAuth, async (req, res, next) => {
   }
 });
 
-// POST create description - protected route
 app.post("/api/descriptions", requireAuth, async (req, res, next) => {
   try {
     const {
@@ -142,7 +151,6 @@ app.post("/api/descriptions", requireAuth, async (req, res, next) => {
   }
 });
 
-// PUT update description - protected route
 app.put("/api/descriptions/:id", requireAuth, async (req, res, next) => {
   try {
     const updatedDescription = await Description.findByIdAndUpdate(
@@ -171,7 +179,6 @@ app.put("/api/descriptions/:id", requireAuth, async (req, res, next) => {
   }
 });
 
-// DELETE description - protected route
 app.delete("/api/descriptions/:id", requireAuth, async (req, res, next) => {
   try {
     const deletedDescription = await Description.findByIdAndDelete(
@@ -194,7 +201,6 @@ app.delete("/api/descriptions/:id", requireAuth, async (req, res, next) => {
   }
 });
 
-// Error handling middleware
 app.use((err, req, res, next) => {
   console.error("Server error:", err.message);
 
