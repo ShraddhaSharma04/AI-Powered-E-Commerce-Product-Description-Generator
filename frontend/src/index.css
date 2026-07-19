@@ -1700,3 +1700,26 @@ body.dark-mode .description-box p {
     flex-wrap: wrap;
   }
 }
+/*Week 7*/
+.save-ai-button {
+  width: 100%;
+  min-height: 48px;
+  margin-top: 14px;
+  padding: 0 24px;
+  border: 1px solid #16a34a;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #15803d;
+  font-weight: 800;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.save-ai-button:hover {
+  background: #dcfce7;
+}
+
+.save-ai-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}

@@ -82,39 +82,19 @@ function Dashboard() {
 
       <main className="dashboard-page">
         <section className="dashboard-header">
-          <p className="section-label">PRODUCT MANAGEMENT</p>
+          <p className="section-label">SAVED DESCRIPTIONS</p>
 
-          <h1>Dashboard</h1>
+          <h1>Saved Product Descriptions</h1>
 
           <p>
-            Monitor and manage your product descriptions stored in
-            MongoDB Atlas.
+            This page shows only the product descriptions saved in MongoDB
+            Atlas.
           </p>
         </section>
 
         {message && <div className="success-message">{message}</div>}
 
         {error && <div className="error-message">{error}</div>}
-
-        <section className="dashboard-stats">
-          <article className="stat-card">
-            <span>{descriptions.length}</span>
-            <h3>Saved Products</h3>
-            <p>Descriptions stored in MongoDB</p>
-          </article>
-
-          <article className="stat-card">
-            <span>AI</span>
-            <h3>Content Generator</h3>
-            <p>Professional product listing content</p>
-          </article>
-
-          <article className="stat-card">
-            <span>3</span>
-            <h3>Tone Styles</h3>
-            <p>Premium, Traditional and Health-Focused</p>
-          </article>
-        </section>
 
         <section className="dashboard-products">
           <div className="dashboard-section-title">
