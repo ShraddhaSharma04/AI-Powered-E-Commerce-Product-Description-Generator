@@ -16,6 +16,7 @@ function Generator() {
   const [generatedDescription, setGeneratedDescription] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [generating, setGenerating] = useState(false);
   const [saving, setSaving] = useState(false);
 
   function handleChange(event) {
@@ -27,28 +28,7 @@ function Generator() {
     }));
   }
 
-  function createDescriptionText() {
-    const toneOpening = {
-      Premium: "Discover the premium quality of",
-      Traditional: "Experience the authentic homemade taste of",
-      "Health-Focused": "Enjoy a wholesome and health-conscious choice with",
-    };
-
-    return `${toneOpening[formData.tone]} ${
-      formData.productName
-    }, carefully prepared using ${
-      formData.ingredients
-    }. This ${formData.weight} product offers ${
-      formData.features
-    }, making it an excellent choice for customers looking for quality and flavour.`;
-  }
-
-  async function handleSubmit(event) {
-    event.preventDefault();
-
-    setMessage("");
-    setError("");
-
+  function validateForm() {
     if (
       !formData.productName.trim() ||
       !formData.ingredients.trim() ||
@@ -56,10 +36,56 @@ function Generator() {
       !formData.features.trim()
     ) {
       setError("Please complete all product fields.");
+      return false;
+    }
+
+    return true;
+  }
+
+  async function generateAIDescription() {
+    setMessage("");
+    setError("");
+
+    if (!validateForm()) {
       return;
     }
 
-    const descriptionText = createDescriptionText();
+    try {
+      setGenerating(true);
+      setGeneratedDescription("");
+
+      const data = await apiRequest("/api/ai/generate-description", {
+        method: "POST",
+        body: JSON.stringify({
+          productName: formData.productName,
+          ingredients: formData.ingredients,
+          weight: formData.weight,
+          tone: formData.tone,
+          features: formData.features,
+        }),
+      });
+
+      setGeneratedDescription(data.data.description);
+      setMessage("AI description generated successfully.");
+    } catch (requestError) {
+      setError(requestError.message || "Unable to generate AI description.");
+    } finally {
+      setGenerating(false);
+    }
+  }
+
+  async function saveDescription() {
+    setMessage("");
+    setError("");
+
+    if (!validateForm()) {
+      return;
+    }
+
+    if (!generatedDescription) {
+      setError("Please generate an AI description before saving.");
+      return;
+    }
 
     try {
       setSaving(true);
@@ -72,15 +98,15 @@ function Generator() {
           weight: formData.weight,
           tone: formData.tone,
           features: formData.features,
-          description: descriptionText,
+          description: generatedDescription,
         }),
       });
 
       setGeneratedDescription(data.data.description);
-      setMessage("Description created and saved in MongoDB successfully.");
+      setMessage("Description saved in MongoDB successfully.");
       setFormData(initialForm);
     } catch (requestError) {
-      setError(requestError.message);
+      setError(requestError.message || "Unable to save description.");
     } finally {
       setSaving(false);
     }
@@ -94,22 +120,28 @@ function Generator() {
         <section className="generator-heading">
           <p className="section-label">AI CONTENT GENERATOR</p>
 
-          <h1>Create a Product Description</h1>
+          <h1>Create an AI Product Description</h1>
 
           <p>
-            Enter your product information and save a professional description
-            directly to MongoDB.
+            Enter your product information, generate a real AI description
+            using Gemini, and save it directly to MongoDB.
           </p>
         </section>
 
         <section className="generator-layout">
-          <form className="generator-form-card" onSubmit={handleSubmit}>
+          <form
+            className="generator-form-card"
+            onSubmit={(event) => {
+              event.preventDefault();
+              generateAIDescription();
+            }}
+          >
             <div className="form-title">
               <span>01</span>
 
               <div>
                 <h2>Product Information</h2>
-                <p>Complete the details below.</p>
+                <p>Complete the details below for AI generation.</p>
               </div>
             </div>
 
@@ -126,7 +158,7 @@ function Generator() {
                   name="productName"
                   value={formData.productName}
                   onChange={handleChange}
-                  placeholder="Example: Himalayan Apple Jam"
+                  placeholder="Example: Traditional Mango Pickle"
                 />
               </div>
 
@@ -138,7 +170,7 @@ function Generator() {
                   name="ingredients"
                   value={formData.ingredients}
                   onChange={handleChange}
-                  placeholder="Apple, sugar, lemon juice"
+                  placeholder="Raw mango, mustard oil, salt, Indian spices"
                   rows="3"
                 />
               </div>
@@ -151,7 +183,7 @@ function Generator() {
                   name="weight"
                   value={formData.weight}
                   onChange={handleChange}
-                  placeholder="Example: 300g"
+                  placeholder="Example: 500g"
                 />
               </div>
 
@@ -178,7 +210,7 @@ function Generator() {
                   name="features"
                   value={formData.features}
                   onChange={handleChange}
-                  placeholder="Natural, handmade, preservative-free"
+                  placeholder="Homemade taste, spicy, preservative-free"
                   rows="4"
                 />
               </div>
@@ -187,20 +219,35 @@ function Generator() {
             <button
               type="submit"
               className="submit-button"
-              disabled={saving}
+              disabled={generating}
             >
-              {saving
-                ? "Saving Description..."
-                : "Create and Save Description"}
+              {generating
+                ? "Generating with Gemini..."
+                : "Generate AI Description"}
+            </button>
+
+            <button
+              type="button"
+              className="save-ai-button"
+              onClick={saveDescription}
+              disabled={saving || generating || !generatedDescription}
+            >
+              {saving ? "Saving..." : "Save Description to MongoDB"}
             </button>
           </form>
 
           <aside className="description-preview">
             <div className="preview-number">02</div>
 
-            <h2>Description Preview</h2>
+            <h2>AI Description Preview</h2>
 
-            {generatedDescription ? (
+            {generating ? (
+              <div className="preview-placeholder">
+                <span>⏳</span>
+
+                <p>Gemini is generating your product description...</p>
+              </div>
+            ) : generatedDescription ? (
               <>
                 <p>{generatedDescription}</p>
 
@@ -219,8 +266,8 @@ function Generator() {
                 <span>✨</span>
 
                 <p>
-                  Your generated description will appear here after you submit
-                  the form.
+                  Your AI-generated description will appear here after you
+                  submit the form.
                 </p>
               </div>
             )}
