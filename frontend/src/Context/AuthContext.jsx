@@ -26,9 +26,9 @@ export function AuthProvider({ children }) {
     }
   });
 
-  const [token, setToken] = useState(
-    () => localStorage.getItem("token") || ""
-  );
+  const [token, setToken] = useState(() => {
+    return localStorage.getItem("token") || "";
+  });
 
   const [loading, setLoading] = useState(true);
 

@@ -1,5 +1,5 @@
 import { Navigate, useLocation } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../Context/AuthContext";
 
 function ProtectedRoute({ children }) {
   const { isAuthenticated, loading } = useAuth();
@@ -8,8 +8,10 @@ function ProtectedRoute({ children }) {
   if (loading) {
     return (
       <main className="auth-loading-page">
-        <div className="auth-loader" />
-        <p>Checking authentication...</p>
+        <div>
+          <div className="auth-loader" />
+          <p>Checking authentication...</p>
+        </div>
       </main>
     );
   }

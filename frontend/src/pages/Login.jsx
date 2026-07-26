@@ -4,14 +4,18 @@ import {
   Navigate,
   useLocation,
   useNavigate,
+  useSearchParams,
 } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../Context/AuthContext";
+
+const API_BASE_URL = "http://localhost:5000";
 
 function Login() {
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
   const { login, isAuthenticated } = useAuth();
 
   const [formData, setFormData] = useState({
@@ -21,7 +25,11 @@ function Login() {
 
   const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
+  const [error, setError] = useState(
+    searchParams.get("oauth") === "failed"
+      ? "Google login failed. Please try again."
+      : ""
+  );
   const [submitting, setSubmitting] = useState(false);
 
   const redirectPath = location.state?.from || "/dashboard";
@@ -65,6 +73,10 @@ function Login() {
     } finally {
       setSubmitting(false);
     }
+  }
+
+  function handleGoogleLogin() {
+    window.location.href = `${API_BASE_URL}/api/auth/google`;
   }
 
   return (
@@ -135,9 +147,6 @@ function Login() {
                   onClick={() =>
                     setShowPassword((currentValue) => !currentValue)
                   }
-                  aria-label={
-                    showPassword ? "Hide password" : "Show password"
-                  }
                 >
                   {showPassword ? "Hide" : "Show"}
                 </button>
@@ -160,16 +169,11 @@ function Login() {
           <button
             type="button"
             className="google-login-button"
-            disabled
-            title="Google login will be connected in the next step"
+            onClick={handleGoogleLogin}
           >
             <span className="google-symbol">G</span>
             Continue with Google
           </button>
-
-          <p className="oauth-note">
-            Google login will be connected after normal login is verified.
-          </p>
 
           <p className="auth-switch-text">
             Do not have an account?{" "}

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../Context/AuthContext";
 
 function Register() {
   const navigate = useNavigate();
@@ -72,9 +72,9 @@ function Register() {
 
       setTimeout(() => {
         navigate("/dashboard", { replace: true });
-      }, 600);
+      }, 700);
     } catch (requestError) {
-      setError(requestError.message);
+      setError(requestError.message || "Registration failed.");
     } finally {
       setSubmitting(false);
     }
@@ -92,7 +92,7 @@ function Register() {
             <h1>Join AI ProductGen</h1>
 
             <p>
-              Register to create, save and manage professional product
+              Register to create, save, and manage professional product
               descriptions.
             </p>
           </div>
@@ -157,9 +157,6 @@ function Register() {
                   onClick={() =>
                     setShowPassword((currentValue) => !currentValue)
                   }
-                  aria-label={
-                    showPassword ? "Hide password" : "Show password"
-                  }
                 >
                   {showPassword ? "Hide" : "Show"}
                 </button>
@@ -193,8 +190,7 @@ function Register() {
           </form>
 
           <p className="auth-switch-text">
-            Already have an account?{" "}
-            <Link to="/login">Sign in here</Link>
+            Already have an account? <Link to="/login">Sign in here</Link>
           </p>
         </section>
       </main>
