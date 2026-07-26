@@ -2,10 +2,11 @@ const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const rateLimit = require("express-rate-limit");
+const passport = require("passport");
 const { body, validationResult } = require("express-validator");
 
 const User = require("../models/User");
-const requireAuth = require("../middleware/requireAuth");
+const requireAuth = require("../Middleware/requireAuth");
 
 const router = express.Router();
 
@@ -14,7 +15,6 @@ const authRateLimiter = rateLimit({
   limit: 5,
   standardHeaders: true,
   legacyHeaders: false,
-
   message: {
     success: false,
     message:
@@ -40,19 +40,11 @@ function sendValidationErrors(req, res, next) {
 }
 
 function createToken(userId) {
-  return jwt.sign(
-    {
-      userId,
-    },
-    process.env.JWT_SECRET,
-    {
-      expiresIn: "7d",
-    }
-  );
+  return jwt.sign({ userId }, process.env.JWT_SECRET, {
+    expiresIn: "7d",
+  });
 }
 
-// Register user
-// POST /api/auth/register
 router.post(
   "/register",
   authRateLimiter,
@@ -133,8 +125,6 @@ router.post(
   }
 );
 
-// Login user
-// POST /api/auth/login
 router.post(
   "/login",
   authRateLimiter,
@@ -166,10 +156,7 @@ router.post(
         });
       }
 
-      const passwordMatches = await bcrypt.compare(
-        password,
-        user.password
-      );
+      const passwordMatches = await bcrypt.compare(password, user.password);
 
       if (!passwordMatches) {
         return res.status(401).json({
@@ -202,8 +189,42 @@ router.post(
   }
 );
 
-// Get logged-in user
-// GET /api/auth/me
+router.get(
+  "/google",
+  passport.authenticate("google", {
+    scope: ["profile", "email"],
+    session: false,
+  })
+);
+
+router.get(
+  "/google/callback",
+  passport.authenticate("google", {
+    failureRedirect: `${
+      process.env.FRONTEND_URL || "http://localhost:5173"
+    }/login?oauth=failed`,
+    session: false,
+  }),
+  (req, res) => {
+    const token = createToken(req.user._id);
+
+    const user = {
+      id: req.user._id,
+      name: req.user.name,
+      email: req.user.email,
+      authProvider: req.user.authProvider,
+    };
+
+    const encodedUser = encodeURIComponent(JSON.stringify(user));
+
+    res.redirect(
+      `${
+        process.env.FRONTEND_URL || "http://localhost:5173"
+      }/oauth-success?token=${token}&user=${encodedUser}`
+    );
+  }
+);
+
 router.get("/me", requireAuth, async (req, res) => {
   return res.status(200).json({
     success: true,
