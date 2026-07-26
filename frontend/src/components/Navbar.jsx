@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../Context/AuthContext";
 
 function Navbar() {
   const navigate = useNavigate();
@@ -42,7 +42,10 @@ function Navbar() {
         <button
           type="button"
           className="mobile-menu-button"
-          onClick={() => setMobileMenuOpen((current) => !current)}
+          onClick={() =>
+            setMobileMenuOpen((currentValue) => !currentValue)
+          }
+          aria-label="Toggle navigation menu"
         >
           {mobileMenuOpen ? "✕" : "☰"}
         </button>
@@ -119,7 +122,10 @@ function Navbar() {
           <button
             type="button"
             className="theme-toggle-button"
-            onClick={() => setDarkMode((current) => !current)}
+            onClick={() =>
+              setDarkMode((currentValue) => !currentValue)
+            }
+            aria-label="Toggle theme"
           >
             {darkMode ? "☀️" : "🌙"}
           </button>
