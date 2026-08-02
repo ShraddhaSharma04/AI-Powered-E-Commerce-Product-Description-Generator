@@ -16,7 +16,7 @@ export async function apiRequest(endpoint, options = {}) {
     headers.Authorization = `Bearer ${token}`;
   }
 
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+  const response = await fetch(`${API_URL}${endpoint}`, {
     ...options,
     headers,
   });
@@ -43,4 +43,4 @@ export async function apiRequest(endpoint, options = {}) {
   return data;
 }
 
-export default API_BASE_URL;
+export default API_URL;
