@@ -6,7 +6,7 @@ const passport = require("passport");
 const { body, validationResult } = require("express-validator");
 
 const User = require("../models/User");
-const requireAuth = require("../Middleware/requireAuth");
+const requireAuth = require("../Middleware/RequireAuth");
 
 const router = express.Router();
 

@@ -7,7 +7,7 @@ require("dotenv").config();
 const authRoutes = require("./Routes/Authroutes");
 const aiRoutes = require("./Routes/aiRoutes");
 const Description = require("./models/Description");
-const requireAuth = require("./Middleware/requireAuth");
+const requireAuth = require("./Middleware/RequireAuth");
 const passport = require("./config/passport");
 
 const app = express();
