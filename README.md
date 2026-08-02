@@ -1,105 +1,385 @@
 # AI-Powered E-Commerce Product Description Generator
 
-An AI-powered full-stack web application that helps food processing businesses generate professional, keyword-rich product descriptions for e-commerce platforms.
-
 ## Project Overview
 
-This project is designed for food processing businesses like HimShakti that want to list their products on platforms such as Amazon, Flipkart, and other online marketplaces. Many small businesses have good quality products but lack proper content-writing support for creating attractive product descriptions.
+**AI ProductGen** is a full-stack web application designed to help food-processing businesses create professional and engaging product descriptions for e-commerce platforms.
 
-The application allows users to enter product details such as product name, ingredients, weight, tone, and key features. The system helps generate and manage product descriptions for e-commerce use. In Week 4, the backend APIs were created using in-memory data. Database and AI integration will be added in upcoming weeks.
+Users can enter product details such as product name, ingredients, weight, key features, and preferred tone. The application generates a product description that can be saved and managed through the dashboard.
 
-## Tech Stack
+---
 
-* Frontend: React JS
-* Styling: Tailwind CSS
-* Backend: Node.js + Express.js
-* Database: MongoDB via Atlas
-* AI API: Gemini API
-* API Testing: Postman / Thunder Client
-* Deployment: Vercel + Render
+## Live Deployment
 
-## Project Progress
+### Frontend
 
-### Week 1: Project Setup
+**Vercel:**
+https://ai-powered-e-commerce-product-descr-five.vercel.app
 
-* Created GitHub repository
-* Added README.md and .gitignore
-* Created frontend and backend folder structure
-* Submitted project brief
+The React frontend is deployed using Vercel.
 
-### Week 2: Frontend Foundations
+### Backend
 
-* Created React frontend using Vite
-* Added Tailwind CSS
-* Built reusable components: Navbar, Hero, Card, and Footer
-* Created pages: Home, About, Generator, and Dashboard
-* Tested frontend locally using Vite
+**Render:**
+https://ai-productgen-backend.onrender.com
 
-### Week 3: UI/UX and Component Design
+The Node.js and Express.js backend is deployed using Render.
 
-* Created Figma wireframes
-* Added reusable UI components
-* Added responsive layouts
-* Added dark/light mode demo
+### Database
 
-### Week 4: Backend and API Development
+**MongoDB Atlas**
 
-* Created Express.js backend server
-* Added REST API endpoints for product descriptions
-* Used in-memory data for Week 4
-* Tested APIs using Postman / Thunder Client
-* Connected frontend Dashboard page to backend API
-* Added loading and error handling on frontend
+MongoDB Atlas is used as the cloud database for storing user accounts and saved product descriptions.
 
-## Folder Structure
+---
+
+## Features
+
+* User registration
+* User login
+* Google OAuth authentication
+* Protected routes
+* Product description generation
+* Multiple product description tones
+* Save product descriptions
+* View saved product descriptions
+* Edit product tone
+* Delete product descriptions
+* MongoDB Atlas integration
+* REST API backend
+* Responsive design
+* Dark and light mode
+* Input validation
+* Password hashing
+* JWT authentication
+* Authentication rate limiting
+
+---
+
+## Technology Stack
+
+### Frontend
+
+* React.js
+* Vite
+* React Router
+* CSS
+
+### Backend
+
+* Node.js
+* Express.js
+* MongoDB
+* Mongoose
+* JWT
+* Passport.js
+* Google OAuth
+* bcryptjs
+* Express Validator
+* Express Rate Limit
+
+### Deployment
+
+* **Vercel** — Frontend
+* **Render** — Backend
+* **MongoDB Atlas** — Database
+
+---
+
+## Project Structure
 
 ```text
 AI-Powered-E-Commerce-Product-Description-Generator/
 │
-├── frontend/
-│   ├── src/
-│   ├── package.json
-│   └── vite.config.js
-│
 ├── backend/
+│   ├── config/
+│   ├── Middleware/
+│   ├── models/
+│   ├── Routes/
 │   ├── server.js
 │   ├── package.json
-│   ├── .env.example
-│   └── README.md
+│   └── .env
+│
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   ├── Context/
+│   │   ├── pages/
+│   │   ├── utils/
+│   │   └── App.jsx
+│   ├── package.json
+│   └── vite.config.js
 │
 ├── README.md
 └── .gitignore
 ```
-How to Run Backend Locally
 
-Follow these steps to run the backend server on your system.
+---
 
-1. Go to the backend folder
-cd backend
-2. Install backend dependencies
-npm install
-3. Create .env file
+## Main Application Pages
 
-Create a .env file inside the backend folder and add:
+### Home
 
-PORT=5000
-4. Start the backend server
-npm run dev
-5. Backend URL
+The Home page provides an introduction to AI ProductGen and explains the main purpose of the application.
 
-The backend will run at:
+### About
 
-http://localhost:5000
-6. Test API
+The About page provides information about the project and its purpose.
 
-Open this URL in browser to check if the backend is working:
+### Generator
 
-http://localhost:5000/api/health
+The Generator page allows users to enter:
 
-Expected response:
+* Product name
+* Ingredients
+* Weight
+* Key features
+* Description tone
 
-{
-  "success": true,
-  "message": "Backend server is running successfully"
-}
+The user can then create and save a product description.
 
+### Dashboard
+
+The Dashboard displays product descriptions stored in MongoDB Atlas.
+
+Users can:
+
+* View saved descriptions
+* Edit the tone
+* Delete descriptions
+* Refresh the saved product list
+
+### Login and Registration
+
+The application provides authentication using:
+
+* Email and password
+* Google OAuth
+
+---
+
+## Environment Variables
+
+### Frontend
+
+The frontend uses:
+
+```env
+VITE_API_URL=https://ai-productgen-backend.onrender.com
+```
+
+This allows the Vite application to communicate with the deployed backend.
+
+### Backend
+
+The backend uses the following environment variables:
+
+```env
+MONGO_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret
+GEMINI_API_KEY=your_gemini_api_key
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+GOOGLE_CALLBACK_URL=your_google_callback_url
+FRONTEND_URL=your_frontend_url
+```
+
+> **Note:** Actual secret values are stored in the Vercel and Render environment variable dashboards and are not committed to GitHub.
+
+---
+
+## API Integration
+
+The frontend communicates with the Express.js backend using REST APIs.
+
+Example API routes include:
+
+```text
+POST /api/auth/register
+POST /api/auth/login
+GET  /api/auth/me
+GET  /api/auth/google
+GET  /api/auth/google/callback
+```
+
+Product description functionality is handled through backend API routes and MongoDB.
+
+---
+
+## Database
+
+The application uses **MongoDB Atlas** as its cloud database.
+
+The database stores information such as:
+
+* User accounts
+* Product names
+* Ingredients
+* Weight
+* Product features
+* Selected tone
+* Generated descriptions
+* Timestamps
+
+Mongoose is used in the backend to interact with MongoDB.
+
+---
+
+## Authentication and Security
+
+The application includes several security mechanisms:
+
+* Password hashing using bcryptjs
+* JWT-based authentication
+* Protected API routes
+* Google OAuth authentication
+* Input validation using Express Validator
+* Authentication rate limiting
+* Environment variables for sensitive credentials
+* CORS configuration
+* `.env` files excluded through `.gitignore`
+
+---
+
+## Deployment
+
+### Frontend Deployment
+
+The frontend is deployed on Vercel.
+
+The Vercel project uses:
+
+```text
+Root Directory: frontend
+Framework: Vite
+Build Command: npm run build
+Output Directory: dist
+```
+
+The production frontend communicates with the Render backend through:
+
+```env
+VITE_API_URL
+```
+
+### Backend Deployment
+
+The backend is deployed on Render.
+
+Render uses:
+
+```text
+Root Directory: backend
+Build Command: npm install
+Start Command: npm start
+```
+
+The backend is available at:
+
+https://ai-productgen-backend.onrender.com
+
+---
+
+## Production Testing
+
+The deployed application was tested to verify the following:
+
+* [x] Frontend loads successfully
+* [x] Backend is accessible
+* [x] MongoDB Atlas connection works
+* [x] User registration works
+* [x] User login works
+* [x] Dashboard loads
+* [x] Saved descriptions are displayed
+* [x] Product descriptions are stored in MongoDB
+* [x] Product descriptions can be deleted
+* [x] Product tone can be updated
+* [x] Protected routes work
+* [x] Frontend communicates with the deployed backend
+* [x] Vercel deployment is successful
+* [x] Render deployment is successful
+
+---
+
+## Known Limitations on Free Tier
+
+* Render's free-tier service may sleep after a period of inactivity.
+* The first request after the backend has been idle may take some time while the service starts.
+* Free-tier deployment resources are limited.
+* Google OAuth requires correctly configured production callback URLs.
+* AI API usage may be limited by the API provider's quota.
+* Free-tier services may have limited performance compared with paid hosting.
+
+---
+
+## Future Scope
+
+The project can be improved further by adding:
+
+* Improved AI-generated descriptions using Gemini API
+* Advanced search and filtering
+* Better form validation
+* User profile management
+* Role-based authentication
+* Product analytics
+* Product image generation
+* Improved security
+* Better error handling
+* Production monitoring
+* Custom domain
+* Improved AI prompt engineering
+* Deployment optimization
+
+---
+
+## Learning Outcomes
+
+During the development and deployment of this project, I learned:
+
+* How to build a full-stack application using React.js and Node.js
+* How to create REST APIs using Express.js
+* How to connect an application to MongoDB Atlas
+* How to implement JWT authentication
+* How to implement Google OAuth
+* How to use environment variables
+* How to deploy a React application on Vercel
+* How to deploy a Node.js backend on Render
+* How to debug deployment errors
+* How to configure CORS for production
+* How to connect a deployed frontend with a deployed backend
+* How to test a full-stack application in a production environment
+
+---
+
+## Week 9 Deployment
+
+This project was deployed as part of **Week 9 — App Deployment & Go-Live**.
+
+### Deployment Deliverables
+
+1. Live Public App URL
+2. Deployment Documentation
+3. Peer Testing Feedback
+4. Deployment Screenshots PDF
+
+### Live URLs
+
+**Frontend:**
+https://ai-powered-e-commerce-product-descr-five.vercel.app
+
+**Backend:**
+https://ai-productgen-backend.onrender.com
+
+---
+
+## Author
+
+**Shraddha Sharma**
+
+B.Tech Computer Science and Engineering
+Graphic Era (Deemed to be University)
+
+---
+
+## License
+
+This project was developed for educational and internship purposes.
